@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 using System.Web.Http;
 using SamplesApi.Models;
 using User = SamplesApi.Models.User;
+using System.Net;
+using System.Net.Http;
+using System.Text;
 
 namespace SamplesApi.Controllers
 {
@@ -32,40 +35,61 @@ namespace SamplesApi.Controllers
             new Sample { SampleId = 3, Barcode = "176033", CreatedAt = new DateTime(2015, 7, 31), CreatedBy = _tempUsers.FirstOrDefault(x => x.UserId == 7), Status = _tempStatuses.FirstOrDefault(x => x.StatusId == 0) }
         };
 
-        public IHttpActionResult GetAllSamples()
+        public HttpResponseMessage GetAllSamples()
         {
             var filter = new Func<Sample, bool>(x => true);
             return FilterSamplesForResults(filter);
         }
 
-        public IHttpActionResult GetSample(int id)
+        public HttpResponseMessage GetSample(int id)
         {
             var filter = new Func<Sample, bool>(x => x.SampleId == id);
             return FilterSamplesForResults(filter);
         }
 
         [Route("api/samples/status/{status}")]
-        public IHttpActionResult GetSampleByStatus(int status)
+        public HttpResponseMessage GetSampleByStatus(int status)
         {
             var filter = new Func<Sample, bool>(x => x.Status.StatusId == status);
             return FilterSamplesForResults(filter);
         }
 
         [Route("api/samples/createdbyname/{nameToSearch}")]
-        public IHttpActionResult GetSampleByName(string nameToSearch)
+        public HttpResponseMessage GetSampleByName(string nameToSearch)
         {
-            var filter = new Func<Sample, bool>(x => Regex.IsMatch(x.CreatedBy.FirstName, nameToSearch, RegexOptions.IgnoreCase) || Regex.IsMatch(x.CreatedBy.LastName, nameToSearch, RegexOptions.IgnoreCase));
+            var filter = new Func<Sample, bool>(x => Regex.IsMatch($"{x.CreatedBy.FirstName} {x.CreatedBy.LastName}", nameToSearch, RegexOptions.IgnoreCase));
             return FilterSamplesForResults(filter);
         }
 
-        private IHttpActionResult FilterSamplesForResults(Func<Sample, bool> filter)
+        [Route("api/samples/create/{barcode}/{createdBy}/{status}")]
+        public IHttpActionResult Create(string barcode, int createdBy, int status)
+        {
+            try
+            {
+                //Do creation
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        private HttpResponseMessage FilterSamplesForResults(Func<Sample, bool> filter)
         {
             var samples = _tempSamples.Where(filter).ToList();
-            if (!samples.Any())
+            try
             {
-                return NotFound();
+                //Do some db call
             }
-            return Ok(JsonConvert.SerializeObject(samples));
+            catch(Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+            }
+
+            var response = Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(JsonConvert.SerializeObject(samples), Encoding.UTF8, "application/json");
+            return response;
         }
     }
 }

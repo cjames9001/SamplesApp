@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "Samples";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #mydiv {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        background-color: grey;
+        opacity: .8;
+    }
+
+    .ajax-loader {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-left: -32px; /* -1 * image width / 2 */
+        margin-top: -32px; /* -1 * image height / 2 */
+        display: block;
+    }
+</style>
+<div ng-app="samplesApp">
+    <div ng-controller="samplesController">
+        <h1>Samples</h1>
+        <input type="text" ng-model="search" ng-model-options="{ debounce: 800 }" onclick="select()" class="form-control" placeholder="Search by name" />
+        <select class="form-control" ng-model="SelectedStatus" ng-change="statusChanged(SelectedStatus)"
+                data-ng-options="status.StatusId as status.StatusName for status in Statuses">
+            <option value="">Retrieve by status</option>
+        </select>
+        <table>
+            <thead>
+                <tr>
+                    <th>SampleId</th>
+                    <th>Barcode</th>
+                    <th>CreatedAt</th>
+                    <th>Created By</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="sample in Samples | filter: barcode">
+                    <td>{{sample.SampleId}}</td>
+                    <td>{{sample.Barcode}}</td>
+                    <td ng-bind="sample.CreatedAt | date:'shortDate'"></td>
+                    <td>{{sample.CreatedBy.FirstName}} {{sample.CreatedBy.LastName}}</td>
+                    <td>{{sample.Status.StatusName}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            <input type="text" class="form-control" ng-model="barcode" placeholder="Search result table">
+        </p>
+        <h2>Add a new sample</h2>
+        <div ng-show="NewSample.HasError" class="field-validation-error">
+            All fields must be filled out.
+        </div>
+        <label>Barcode</label>
+        <input type="text" class="form-control" data-ng-model="NewSample.Barcode" />
+        <label>User</label>
+        <select class="form-control" ng-model="NewSample.CreatedBy" 
+                data-ng-options="user.UserId as (user.FirstName + ' ' + user.LastName) for user in Users">
+            <option value="">Select user</option>
+        </select>
+        <label>Status</label>
+        <select class="form-control" ng-model="NewSample.Status"
+                data-ng-options="status.StatusId as status.StatusName for status in Statuses">
+            <option value="">Select status</option>
+        </select>
+
+        <div>
+            <button data-ng-click="save()" class="form-control">Save</button>
+            <button data-ng-click="clear()" class="form-control">Clear</button>
+        </div>
+    </div>
+</div>
