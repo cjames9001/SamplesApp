@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web.Http;
 using SamplesApi.Models;
 using User = SamplesApi.Models.User;
@@ -52,7 +54,7 @@ namespace SamplesApi.Controllers
         [Route("api/samples/createdbyname/{nameToSearch}")]
         public IHttpActionResult GetSampleByName(string nameToSearch)
         {
-            var filter = new Func<Sample, bool>(x => x.CreatedBy.FirstName.Contains(nameToSearch) || x.CreatedBy.LastName.Contains(nameToSearch));
+            var filter = new Func<Sample, bool>(x => Regex.IsMatch(x.CreatedBy.FirstName, nameToSearch, RegexOptions.IgnoreCase) || Regex.IsMatch(x.CreatedBy.LastName, nameToSearch, RegexOptions.IgnoreCase));
             return FilterSamplesForResults(filter);
         }
 
@@ -63,7 +65,7 @@ namespace SamplesApi.Controllers
             {
                 return NotFound();
             }
-            return Ok(samples);
+            return Ok(JsonConvert.SerializeObject(samples));
         }
     }
 }
