@@ -9,11 +9,14 @@ using User = SamplesApi.Models.User;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace SamplesApi.Controllers
 {
     public class SamplesController : ApiController
     {
+        private IList<Sample> _sampleFromDb;
         private static IEnumerable<Status> _tempStatuses = new List<Status>
         {
             new Status { StatusId = 0, StatusName = "Received" },
@@ -80,16 +83,42 @@ namespace SamplesApi.Controllers
             var samples = _tempSamples.Where(filter).ToList();
             try
             {
-                //Do some db call
+                _sampleFromDb = new List<Sample>();
+                var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (SqlCommand command = new SqlCommand(
+                    "SELECT * FROM dbo.[Sample] " +
+                    "JOIN dbo.[User] " +
+                    "ON dbo.[User].UserId = Sample.CreatedBy " +
+                    "JOIN Status " +
+                    "ON Status.StatusId = Sample.StatusId", connection))
+                {
+                    connection.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var sample = new Sample
+                            {
+                                SampleId = Convert.ToInt32(reader["SampleId"]),
+                                Barcode = reader["Barcode"].ToString(),
+                                CreatedAt = Convert.ToDateTime(reader["CreatedAt"]),
+                                CreatedBy = new User { UserId = Convert.ToInt32(reader["UserId"]), FirstName = reader["FirstName"].ToString(), LastName = reader["LastName"].ToString() },
+                                Status = new Status { StatusId = Convert.ToInt32(reader["StatusId"]), StatusName = reader["Status"].ToString() }
+                            };
+                            _sampleFromDb.Add(sample);
+                        }
+                    }
+                }
+
+                var response = Request.CreateResponse(HttpStatusCode.OK);
+                response.Content = new StringContent(JsonConvert.SerializeObject(_sampleFromDb.Where(filter)), Encoding.UTF8, "application/json");
+                return response;
             }
             catch(Exception ex)
             {
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
             }
-
-            var response = Request.CreateResponse(HttpStatusCode.OK);
-            response.Content = new StringContent(JsonConvert.SerializeObject(samples), Encoding.UTF8, "application/json");
-            return response;
         }
     }
 }
