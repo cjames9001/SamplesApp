@@ -1,0 +1,141 @@
+﻿@{
+    ViewBag.Title = "Samples";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .fluidDiv {
+        display: inline-block;
+        width: 100%;
+    }
+    
+    #searchArea > div {
+        float: left;
+        padding: 5px;
+    }
+
+    #searchArea > div > h3 {
+        margin-top: 3px;
+    }
+
+    .column {
+        float:left;
+        padding: 0 50px;
+    }
+
+    .leftColumn {
+        display:table;
+        float:left;
+    }
+
+    .leftColumnButton {
+        width:250px;
+    }
+
+    .leftColumnButtonGroup {
+        margin:5px;
+        width:250px;
+    }
+
+    .rightColumn {
+        float:left;
+    }
+
+    .rightColumn > h2 {
+        margin: 0;
+    }
+
+    th, td {
+        padding: 5px;
+    }
+
+    tr:nth-child(even) {
+        background-color: lightgray;
+    }
+
+    .loadingScreen {
+        width:100%;
+        height:100%;
+        z-index: 2147483647;
+        position: fixed;
+        cursor: not-allowed;
+    }
+
+    .loadingScreen > div {
+        text-align:center;
+        margin-top: 20%;
+    }
+</style>
+<div ng-app="samplesApp">
+    <div ng-controller="samplesController" class="fluidDiv">
+        <div class="loadingScreen" ng-show="IsLoading">
+            <div>
+                <i class="fa fa-cog fa-spin fa-3x fa-fw"></i>
+                <br />
+                <span>Loading...</span>
+            </div>
+        </div>
+        <h1>Samples</h1>
+        <div class="leftColumn column">
+            <div id="searchArea">
+                <div>
+                    <input type="text" ng-model="Search" ng-model-options="{ debounce: 100 }" onclick="select()" class="form-control leftColumnButton" placeholder="Search by name" />
+                </div>
+                <div>
+                    <h3>OR</h3>
+                </div>
+                <div>
+                    <select class="form-control leftColumnButton" ng-model="SelectedStatus" ng-change="statusChanged(SelectedStatus)"
+                            data-ng-options="status.StatusId as status.StatusName for status in Statuses">
+                        <option value="">Search by status</option>
+                    </select>
+                </div>
+                <br />
+            </div>
+            <div class="leftColumnButtonGroup">
+                <button data-ng-click="clear()" class="form-control leftColumnButton">Clear All Input and Get All Samples</button>
+                <input type="text" class="form-control leftColumnButton" ng-model="TableFilter" placeholder="Filter result table">
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sample Id</th>
+                        <th>Barcode</th>
+                        <th>Created At</th>
+                        <th>Created By</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="sample in Samples | filter: TableFilter">
+                        <td>{{sample.SampleId}}</td>
+                        <td>{{sample.Barcode}}</td>
+                        <td ng-bind="sample.CreatedAt | date:'shortDate'"></td>
+                        <td>{{sample.CreatedBy.FirstName}} {{sample.CreatedBy.LastName}}</td>
+                        <td>{{sample.Status.StatusName}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="rightColumn column">
+            <h2>Add a new sample</h2>
+            <div ng-show="NewSample.HasError" class="field-validation-error">
+                All fields must be filled out.
+            </div>
+            <label>Barcode</label>
+            <input type="text" class="form-control" data-ng-model="NewSample.Barcode" />
+            <label>User</label>
+            <select class="form-control" ng-model="NewSample.CreatedBy"
+                    data-ng-options="user.UserId as (user.FirstName + ' ' + user.LastName) for user in Users">
+                <option value="">Select user</option>
+            </select>
+            <label>Status</label>
+            <select class="form-control" ng-model="NewSample.Status"
+                    data-ng-options="status.StatusId as status.StatusName for status in Statuses">
+                <option value="">Select status</option>
+            </select>
+            <br />
+            <button data-ng-click="save()" class="form-control">Save</button>
+        </div>
+    </div>
+</div>
