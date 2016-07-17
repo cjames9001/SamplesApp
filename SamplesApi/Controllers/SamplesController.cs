@@ -84,7 +84,7 @@ namespace SamplesApi.Controllers
             try
             {
                 _sampleFromDb = new List<Sample>();
-                var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+                var connectionString = ConfigurationManager.ConnectionStrings["AzureDbConnection"].ConnectionString;
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 using (SqlCommand command = new SqlCommand(
                     "SELECT * FROM dbo.[Sample] " +
