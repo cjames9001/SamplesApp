@@ -7,9 +7,16 @@
 
     samplesController.$inject = ['$scope', 'Samples'];
 
+    var showMessage = function (message) {
+        alert(message);
+    }
+
     function samplesController($scope, Samples) {
         var getAllSamples = function () {
-            $scope.Samples = Samples.AllSamples.query();
+            var onError = function (err) {
+                showMessage('There was a problem getting all of the samples: ' + err.data);
+            }
+            $scope.Samples = Samples.AllSamples.query({}, function () { }, onError);
         }
 
         $scope.$watch('search', function (newValue, oldValue) {
@@ -22,7 +29,10 @@
         });
 
         var getSamplesByUser = function (userName) {
-            $scope.Samples = Samples.SamplesByUser.query({ nameToSearch: userName });
+            var onError = function (err) {
+                showMessage('There was a problem getting the samples by user: ' + err.data);
+            }
+            $scope.Samples = Samples.SamplesByUser.query({ nameToSearch: userName }, function () { }, onError);
         }
 
         $scope.select = function () {
@@ -30,19 +40,25 @@
         }
 
         $scope.statusChanged = function (statusId) {
+            var onError = function (err) {
+                showMessage('There was an error getting the samples by status: ' + err.data);
+            }
+
             if (statusId === null)
                 getAllSamples();
             else
-                $scope.Samples = Samples.SamplesByStatus.query({ status: statusId });
+                $scope.Samples = Samples.SamplesByStatus.query({ status: statusId }, function () { }, onError);
         }
 
         $scope.save = function () {
             var onSuccess = function () {
-                alert('Saved');
+                $scope.clear();
+                getAllSamples();
+                showMessage('Saved');
             }
 
             var onError = function (err) {
-                alert('There was an error saving the sample: ' + err.data);
+                showMessage('There was an error saving the sample: ' + err.data);
             }
 
             if ($scope.NewSample.Barcode !== '' && $scope.NewSample.CreatedBy !== '' && $scope.NewSample.Status !== '')
