@@ -9,10 +9,8 @@ namespace SamplesApp.Controllers
             return View();
         }
 
-        public ActionResult Contact()
+        public ActionResult About()
         {
-            ViewBag.Message = "Your contact page.";
-
             return View();
         }
     }
