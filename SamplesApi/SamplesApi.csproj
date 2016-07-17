@@ -137,7 +137,9 @@
     <Content Include="Scripts\app.js" />
     <Content Include="Scripts\Controllers\samplesController.js" />
     <Content Include="Scripts\Services\samplesService.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -147,6 +149,12 @@
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\SamplesController.cs" />
+    <Compile Include="Converters\Converter.cs" />
+    <Compile Include="Data\DatabaseCommand.cs" />
+    <Compile Include="Data\IDatabaseCommand.cs" />
+    <Compile Include="Factories\SampleFactory.cs" />
+    <Compile Include="Factories\StatusFactory.cs" />
+    <Compile Include="Factories\UserFactory.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
