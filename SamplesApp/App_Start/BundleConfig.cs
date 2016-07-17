@@ -24,7 +24,8 @@ namespace SamplesApp
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Content/site.css",
+                      "~/Content/Main.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/indexjs").Include(
                      "~/Scripts/app.js",
